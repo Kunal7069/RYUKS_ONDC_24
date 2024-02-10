@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Website</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #088178;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .filter {
+            width: 70%;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        label {
+            font-size: 18px;
+            margin-right: 10px;
+            color: #555;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+            color: #333;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        select:hover,
+        select:focus {
+            border-color: #666;
+        }
+
+        table {
+            width: 70%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 2px solid #ddd;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 15px;
+        }
+
+        td:first-child {
+            width: 50%;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-label {
+            margin-right: 10px;
+        }
+
+        .toggle-btn {
+            background-color: #ddd;
+            border: none;
+            color: #fff;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 20px;
+        }
+
+        .toggle-on {
+            background-color: #088178;
+        }
+
+        .toggle-off {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Parameter</h1>
+    </header>
+
+    <main>
+        <div class="filter">
+            <label for="category">Select Category:</label>
+            <select id="category" name="category" onchange="updateParameters()">
+                <option value="clothes" selected>Clothes</option>
+                <option value="electronics">Foods</option>
+                <option value="medicines">Medicines</option>
+                <!-- Add more categories as needed -->
+            </select>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Toggle</th>
+                </tr>
+            </thead>
+            <tbody id="parameters">
+                <!-- Parameters will be dynamically added here using JavaScript -->
+            </tbody>
+        </table>
+    </main>
+    <script src="https://unpkg.com/@elastic/elasticsearch@7.15.0/dist/elasticsearch.umd.min.js"></script>
+    <script>
+        // Object to store parameters for each category
+        const categoryParameters = {
+            clothes: ['Name', 'Price', 'Size', 'Material', 'Type'],
+            electronics: ['Name', 'Price', 'Weight','Ingredients','Company','Expiry'],
+            medicines: ['Name', 'Price', 'Weight','Ingredients','Company','Expiry'],
+            // Add more categories and parameters as needed
+        };
+        
+        // Function to update parameters based on selected category
+        function updateParameters() {
+            const categorySelect = document.getElementById('category');
+            const currentCategory = categorySelect.value;
+            const parametersTable = document.getElementById('parameters');
+
+            // Clear existing parameters
+            parametersTable.innerHTML = '';
+
+            // Add parameters for the selected category
+            categoryParameters[currentCategory].forEach(function(paramText) {
+                // Create a new row
+                const newRow = document.createElement('tr');
+
+                // First column: Parameter name
+                const parameterName = document.createElement('td');
+                parameterName.textContent = paramText; // Set text from the stored parameters
+                newRow.appendChild(parameterName);
+
+                // Second column: Toggle button
+                const toggleContainer = document.createElement('td');
+                toggleContainer.className = 'toggle-container';
+
+                const toggleLabel = document.createElement('span');
+                toggleLabel.className = 'toggle-label';
+                toggleLabel.textContent = 'Toggle:';
+                toggleContainer.appendChild(toggleLabel);
+
+                const toggleButton = document.createElement('button');
+                toggleButton.className = 'toggle-btn'; // Initially set without any class
+                toggleButton.addEventListener('click', function() {
+                    toggleButton.classList.toggle('toggle-on');
+                    toggleButton.classList.toggle('toggle-off');
+                 
+                    // Use if-else statement to set the text content
+                    if (toggleButton.classList.contains('toggle-on')) {
+                        toggleButton.textContent = 'On';
+                        console.log("on")
+                        
+
+                    } else {
+                        toggleButton.textContent = 'Off';
+                        console.log("off")
+    
+                    }
+
+                    // Save the state in localStorage
+                    const stateKey = `${currentCategory}_${paramText}`;
+                    localStorage.setItem(stateKey, toggleButton.classList.contains('toggle-on') ? 'On' : 'Off');
+                });
+
+                // Set initial state based on localStorage
+                const savedState = localStorage.getItem(`${currentCategory}_${paramText}`);
+                toggleButton.classList.toggle('toggle-on', savedState === 'On');
+                toggleButton.classList.toggle('toggle-off', savedState === 'Off');
+                toggleButton.textContent = savedState || 'On';
+
+                toggleContainer.appendChild(toggleButton);
+
+                newRow.appendChild(toggleContainer);
+
+                // Append the new row to the table
+                parametersTable.appendChild(newRow);
+            });
+        }
+
+        // Initialize parameters based on the default category
+        updateParameters();
+    </script>
+
+</body>
+</html>
